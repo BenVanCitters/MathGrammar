@@ -1,16 +1,15 @@
 class CommandObj<T>
 {
   public ArrayList<CommandObj> children = new ArrayList<CommandObj>();
-  public ArrayList<CommandObj> getChildren(){return children;} 
   void doTheBiz() { }
 }
 
 MathCommand getMathCommand(int depth)
 {
-//  println("getMathCommand d ");
+  println("getMathCommand: depth = " + depth);
   MathCommand m = null;
   //prevent super deep trees
-  if( depth > 5)
+  if( depth > 10)
   { m = new FloatCommand(-1,1); }
   else
   {
@@ -67,8 +66,16 @@ class MathCommand<Number> extends CommandObj
     boolean inValid = (v.equals(Float.NEGATIVE_INFINITY)) || (v.equals(Float.POSITIVE_INFINITY)) || (v.equals(Float.NaN)); 
     if( inValid ) 
     {  
-//      if(children.size() != 0) { } //dive into children to find root of error
-      println(this.getClass().getName() + " " + getStr() +  " evaluates NNNAAANNN"); } 
+      boolean goodChildren = true;
+      //dive into children to find root of error
+      for(int i = 0; i < children.size(); i++)
+      {
+        MathCommand m = (MathCommand)children.get(i);
+        goodChildren = goodChildren & m.checkValidMath();        
+      } 
+      if(goodChildren){    
+        println(this.getClass().getName() + " " + getStr() +  " evaluates NNNAAANNN");} 
+} 
 //    else { println(this.getClass().getName() +" VALID: " + v); }
     return !inValid;
   }
@@ -98,8 +105,7 @@ class MultCommand extends BinaryCommand<Float>
 {
   public MultCommand(int depth) { super(depth);}
   Float compute()
-  {  A.checkValidMath();B.checkValidMath(); 
-     return (Float)A.compute() * (Float)B.compute(); }
+  {  return (Float)A.compute() * (Float)B.compute(); }
 
   String getStr()
   { return A.getStr() + " * " + B.getStr(); }
@@ -110,7 +116,6 @@ class DivideCommand extends BinaryCommand<Float>
   public DivideCommand(int depth) { super(depth);}
   Float compute()
   {  
-    A.checkValidMath();B.checkValidMath();
     return (Float)A.compute() / (Float)B.compute();
    }
 
@@ -123,7 +128,6 @@ class AddCommand extends BinaryCommand<Float>
   public AddCommand(int depth) { super(depth);}
   Float compute()
   {  
-     A.checkValidMath();B.checkValidMath();
     return (Float)A.compute() + (Float)B.compute();
   }
   
@@ -144,7 +148,7 @@ class SinCommand extends UnaryCommand<Float>
 {
   public SinCommand(int depth) { super(depth);}
   Float compute()
-  {  mc.checkValidMath(); return sin((Float)mc.compute()); }
+  {  return sin((Float)mc.compute()); }
   String getStr()
   { return "sin( " + mc.getStr() + " )";  }
 }
@@ -154,7 +158,7 @@ class LogCommand extends UnaryCommand<Float>
 {
   public LogCommand(int depth) { super(depth);}
   Float compute()
-  {  mc.checkValidMath(); return log((Float)mc.compute()); }
+  {  return log((Float)mc.compute()); }
   String getStr()
   { return "log( " + mc.getStr() + " )";  }
 }
@@ -163,7 +167,7 @@ class CosCommand extends UnaryCommand<Float>
 {
   public CosCommand(int depth) { super(depth);}
   Float compute()
-  {  mc.checkValidMath(); return cos((Float)mc.compute()); }
+  {  return cos((Float)mc.compute()); }
   String getStr()
   { return "cos( " + mc.getStr() + " )";  }
 }
@@ -172,7 +176,7 @@ class PowCommand extends BinaryCommand<Float>
 {
   public PowCommand(int depth) { super(depth);}
   Float compute()
-  {  A.checkValidMath(); B.checkValidMath(); return pow((Float)A.compute(),(Float)B.compute()); }
+  {  return pow((Float)A.compute(),(Float)B.compute()); }
   String getStr()
   { return "pow( " + A.getStr() + ", " + B.getStr() + " )";  }
 }

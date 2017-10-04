@@ -40,4 +40,5 @@ void draw()
   
   println("======================");
   m.printMe();   
+  m.checkValidMath();
 }
