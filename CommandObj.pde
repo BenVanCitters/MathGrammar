@@ -1,9 +1,9 @@
 class CommandObj<T>
 {
   public ArrayList<CommandObj> children = new ArrayList<CommandObj>();
-  void doTheBiz() { }
 }
 
+//"factory" method - passing depth allows 
 MathCommand getMathCommand(int depth)
 {
   println("getMathCommand: depth = " + depth);
@@ -13,6 +13,7 @@ MathCommand getMathCommand(int depth)
   { m = new FloatCommand(-1,1); }
   else
   {
+    //decide via a uniform random distribution between all math ops
     int r = (int)random(9);
     switch (r)
     {
@@ -28,16 +29,16 @@ MathCommand getMathCommand(int depth)
       case 3: //cos
         m = new CosCommand(depth);
         break;
-      case 4: //time
+      case 4: //time-based variable
         m = new TimeFloatCommand();
         break;     
       case 5:
         m = new DivideCommand(depth);
         break; 
-      case 6: //pow
+      case 6: //pow x^y
         m = new PowCommand(depth);
         break;
-      case 7: //log
+      case 7: //logarithm
         m = new LogCommand(depth);
         break;
 //      case 10: //val
@@ -48,7 +49,6 @@ MathCommand getMathCommand(int depth)
         break;    
     }
   }
-//  m.depth = depth;
   return m;
 }
 
@@ -57,9 +57,11 @@ class MathCommand<Number> extends CommandObj
   int depth = 0;
   public MathCommand() {  }
   public MathCommand(int depth) { this.depth = depth; }
-  public void printMe()
-  { println( getStr() + " = " + compute()); }
   
+  
+  //checks the equation to find any and all operations that result in:
+  // NaN (div by zero or imaginary numbers)
+  // (+/-)Infinity too big or small for variable 
   boolean checkValidMath()
   {  
     Float v = (Float)compute(); 
@@ -80,7 +82,10 @@ class MathCommand<Number> extends CommandObj
     return !inValid;
   }
   
-  String getStr()
+  public void printMe()
+  { println( getStr() + " = " + compute()); }
+  
+  public String getStr()
   { return "BLANK MATH"; }
   
   //virtual
@@ -88,6 +93,7 @@ class MathCommand<Number> extends CommandObj
   {  return null; }
 }
 
+// Two-variable operator parent class
 class BinaryCommand<T> extends MathCommand<T>
 {
   MathCommand A,B;
@@ -96,11 +102,12 @@ class BinaryCommand<T> extends MathCommand<T>
   {  super(depth); A = getMathCommand(this.depth+1); 
      B = getMathCommand(this.depth+1);  
      children.add(A);children.add(B); }
-  
+  //two arg command constructor 
   public BinaryCommand(MathCommand a, MathCommand b)
   {  A = a; B = b; children.add(a);children.add(b); }
 }
 
+//multiplication - binary operator - branch node
 class MultCommand extends BinaryCommand<Float>
 {
   public MultCommand(int depth) { super(depth);}
@@ -111,6 +118,7 @@ class MultCommand extends BinaryCommand<Float>
   { return A.getStr() + " * " + B.getStr(); }
 }
 
+//division - binary operator - branch node
 class DivideCommand extends BinaryCommand<Float>
 {
   public DivideCommand(int depth) { super(depth);}
@@ -123,6 +131,7 @@ class DivideCommand extends BinaryCommand<Float>
   { return A.getStr() + " / " + B.getStr(); }
 }
 
+//addition - binary operator - branch node
 class AddCommand extends BinaryCommand<Float> 
 {
   public AddCommand(int depth) { super(depth);}
@@ -132,9 +141,10 @@ class AddCommand extends BinaryCommand<Float>
   }
   
   String getStr()
-  { return A.getStr() + " + " + B.getStr(); }
+  { return "( " +  A.getStr() + " + " + B.getStr() + " )"; }
 }
 
+// Single variable operator parent class
 class UnaryCommand<T> extends MathCommand<T>
 {
   MathCommand mc;
@@ -144,6 +154,7 @@ class UnaryCommand<T> extends MathCommand<T>
   {  mc = c;  children.add(c); }
 }
 
+//Sine
 class SinCommand extends UnaryCommand<Float>
 {
   public SinCommand(int depth) { super(depth);}
@@ -163,6 +174,7 @@ class LogCommand extends UnaryCommand<Float>
   { return "log( " + mc.getStr() + " )";  }
 }
 
+//cosine
 class CosCommand extends UnaryCommand<Float>
 {
   public CosCommand(int depth) { super(depth);}
@@ -172,6 +184,7 @@ class CosCommand extends UnaryCommand<Float>
   { return "cos( " + mc.getStr() + " )";  }
 }
 
+//power command - raises x to the power of y
 class PowCommand extends BinaryCommand<Float>
 {
   public PowCommand(int depth) { super(depth);}
@@ -181,6 +194,7 @@ class PowCommand extends BinaryCommand<Float>
   { return "pow( " + A.getStr() + ", " + B.getStr() + " )";  }
 }
 
+//Single precision constant floating point command - no children - leaf node in grammar tree
 class FloatCommand extends MathCommand<Float>
 {
   float val;
@@ -194,6 +208,7 @@ class FloatCommand extends MathCommand<Float>
   { return "" + val;   }
 }
 
+//sketch-time based command  - no children - leaf node in grammar tree
 class TimeFloatCommand extends MathCommand<Float>
 {
   public TimeFloatCommand() { }
@@ -205,9 +220,11 @@ class TimeFloatCommand extends MathCommand<Float>
   { return "t(" + compute() + ")"; }
 }
 
+//Constant Integer command  - no children - leaf node in grammar tree
 class IntCommand extends MathCommand<Integer>
 {
   int val;
+  //random constructor
   public IntCommand(int min, int max)
   { val = (int)random(min,max); }
   

@@ -1,9 +1,10 @@
+//art commands return void and simply draw something on the main screen
 class ArtCommand extends CommandObj
 {
-  void doTheBiz()
-  {}
+  void doTheBiz() {}
 }
 
+// ellipse command - draws an ellipse
 class EllipseCommad extends ArtCommand
 {
   MathCommand x,y,w,h;
@@ -39,6 +40,7 @@ class EllipseCommad extends ArtCommand
   }
 }
 
+//Rectangle draw a rect
 class RectangleCommad extends ArtCommand
 {
   MathCommand x,y,w,h;
@@ -72,6 +74,7 @@ class RectangleCommad extends ArtCommand
   }
 }
 
+//Matrix translation
 class Translate2DCommand extends ArtCommand
 {
   MathCommand x,y;
@@ -90,6 +93,7 @@ class Translate2DCommand extends ArtCommand
   }
 }
 
+//Rotation matrix stack command
 class Rotate2DCommad extends ArtCommand
 {
   MathCommand angle;
