@@ -73,9 +73,9 @@ class MathCommand<Number> extends CommandObj
         MathCommand m = (MathCommand)children.get(i);
         goodChildren = goodChildren & m.checkValidMath();        
       } 
-      if(goodChildren){    
-        println(this.getClass().getName() + " " + getStr() +  " evaluates NNNAAANNN");} 
-} 
+      if(goodChildren)
+      { println(this.getClass().getName() + " " + getStr() +  " evaluates NNNAAANNN"); } 
+    } 
 //    else { println(this.getClass().getName() +" VALID: " + v); }
     return !inValid;
   }
